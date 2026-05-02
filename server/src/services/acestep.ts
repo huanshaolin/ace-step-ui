@@ -187,7 +187,7 @@ async function buildGradioArgs(params: GenerationParams): Promise<unknown[]> {
     0.02,                                                         // 33: DCW High Scaler
     'haar',                                                       // 34: DCW Wavelet
     params.customTimesteps || '',                                 // 35: Custom Timesteps
-    params.audioFormat || 'wav',                                  // 36: Audio Format
+    (params.audioFormat === 'flac' ? 'flac' : 'wav'),             // 36: Audio Format (mp3 disabled: TorchCodec incompatible with PyTorch nightly)
     '128k',                                                       // 37: MP3 Bitrate
     48000,                                                        // 38: MP3 Sample Rate
     params.lmTemperature ?? 0.85,                                 // 39: LM Temperature
