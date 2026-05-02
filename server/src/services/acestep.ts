@@ -806,7 +806,7 @@ interface PythonResult {
   error?: string;
 }
 
-function runPythonGeneration(scriptArgs: string[], timeoutMs = 600000): Promise<PythonResult> {
+function runPythonGeneration(scriptArgs: string[], timeoutMs = 1800000): Promise<PythonResult> {
   return new Promise((resolve) => {
     const pythonPath = resolvePythonPath(ACESTEP_DIR);
     const args = [PYTHON_SCRIPT, ...scriptArgs];
