@@ -53,27 +53,8 @@ app.use(helmet({
 
 // Middleware
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    // Allow localhost and 127.0.0.1 on any port in development
-    if (config.nodeEnv === 'development') {
-      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-        return callback(null, true);
-      }
-      // Allow LAN IPs (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
-      const lanPattern = /^https?:\/\/(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
-      if (lanPattern.test(origin)) {
-        return callback(null, true);
-      }
-    }
-    // Allow configured frontend URL
-    if (origin === config.frontendUrl) {
-      return callback(null, true);
-    }
-    callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
+  origin: '*',
+  credentials: false,
 }));
 
 app.use(express.json());
