@@ -187,7 +187,7 @@ async function buildGradioArgs(params: GenerationParams): Promise<unknown[]> {
     0.02,                                                         // 33: DCW High Scaler
     'haar',                                                       // 34: DCW Wavelet
     params.customTimesteps || '',                                 // 35: Custom Timesteps
-    params.audioFormat || 'mp3',                                  // 36: Audio Format
+    params.audioFormat || 'wav',                                  // 36: Audio Format
     '128k',                                                       // 37: MP3 Bitrate
     48000,                                                        // 38: MP3 Sample Rate
     params.lmTemperature ?? 0.85,                                 // 39: LM Temperature
@@ -599,7 +599,7 @@ async function processGenerationViaGradio(
   // Download audio files to local storage
   const audioUrls: string[] = [];
   let actualDuration = 0;
-  const audioFormat = params.audioFormat ?? 'mp3';
+  const audioFormat = params.audioFormat ?? 'wav';
 
   for (const fileObj of audioFileObjects) {
     const origName = fileObj.orig_name || fileObj.path || '';
@@ -695,7 +695,7 @@ async function processGenerationViaPython(
       '--batch-size', String(params.batchSize ?? 1),
       '--infer-steps', String(params.inferenceSteps ?? 8),
       '--guidance-scale', String(params.guidanceScale ?? 10.0),
-      '--audio-format', params.audioFormat ?? 'mp3',
+      '--audio-format', params.audioFormat ?? 'wav',
       '--output-dir', jobOutputDir,
       '--json',
     ];
