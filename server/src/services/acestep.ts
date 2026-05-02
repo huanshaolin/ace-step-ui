@@ -175,7 +175,7 @@ async function buildGradioArgs(params: GenerationParams): Promise<unknown[]> {
     params.useAdg ?? false,                                       // 21: Use ADG
     params.cfgIntervalStart ?? 0.0,                               // 22: CFG Interval Start
     params.cfgIntervalEnd ?? 1.0,                                 // 23: CFG Interval End
-    params.shift ?? 3.0,                                          // 24: Shift
+    params.shift ?? 0.0,                                          // 24: Shift
     params.inferMethod || 'ode',                                  // 25: Inference Method
     params.customTimesteps || '',                                 // 26: Custom Timesteps
     params.audioFormat || 'mp3',                                  // 27: Audio Format
