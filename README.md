@@ -148,7 +148,7 @@
 | **Python** | 3.10+ (3.11 recommended) OR Windows Portable Package |
 | **NVIDIA GPU** | 4GB+ VRAM (works without LLM), 12GB+ recommended (with LLM) |
 | **CUDA** | 12.8 (for Windows Portable Package) |
-| **FFmpeg** | For audio processing |
+| **FFmpeg** | 5.x or higher — for MP3 export (libavutil.so.57+) |
 | **uv** | Python package manager (recommended for standard install) |
 
 ---
@@ -268,7 +268,48 @@ uv pip install -e .
 cd ..
 ```
 
-### 2. Install ACE-Step UI (This Repository)
+### 2. Install FFmpeg (Required for MP3 export)
+
+ACE-Step uses TorchCodec to encode MP3, which requires **FFmpeg 5 or higher** (`libavutil.so.57+`). FFmpeg 4 (default on Ubuntu 20.04/22.04) is **not sufficient**.
+
+#### Ubuntu 24.04
+```bash
+apt-get update && apt-get install -y ffmpeg
+ldconfig
+```
+
+#### Ubuntu 22.04 (jammy)
+```bash
+apt-get install -y software-properties-common
+add-apt-repository -y ppa:ubuntuhandbook1/ffmpeg6
+apt-get update && apt-get install -y ffmpeg
+ldconfig
+```
+
+#### Ubuntu 20.04 (focal)
+```bash
+apt-get install -y software-properties-common
+add-apt-repository -y ppa:savoury1/ffmpeg5
+apt-get update && apt-get install -y ffmpeg
+ldconfig
+```
+
+#### macOS
+```bash
+brew install ffmpeg
+```
+
+#### Verify installation
+```bash
+ldconfig -p | grep libavutil
+# Must show .so.57 or higher (e.g. libavutil.so.58, .59, .60)
+```
+
+> **Note:** If you cannot upgrade FFmpeg, ACE-Step UI will still work — audio will be saved as WAV instead of MP3.
+
+---
+
+### 3. Install ACE-Step UI (This Repository)
 
 #### Linux / macOS
 ```bash
@@ -438,6 +479,7 @@ Full control over every parameter:
 | **Genre always sounds like ballad** | Enable **AI Enhance** toggle in the Style section — it enriches your tags with proper metadata |
 | **AttributeError: 'NoneType'** | Update to latest ACE-Step-1.5 (fix merged in PR #109) |
 | **Songs show 0:00 duration** | Install FFmpeg: `sudo apt install ffmpeg` (Linux) or download from [ffmpeg.org](https://ffmpeg.org) (Windows) |
+| **MP3 export failed / No audio files generated** | FFmpeg 4.x is installed but TorchCodec requires FFmpeg 5+. Upgrade FFmpeg (see [FFmpeg installation](#2-install-ffmpeg-required-for-mp3-export) section) or the app will fallback to WAV automatically |
 | **LAN access not working** | Check firewall allows ports 3000 and 3001 |
 
 ---
