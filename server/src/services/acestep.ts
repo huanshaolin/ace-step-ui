@@ -172,36 +172,59 @@ async function buildGradioArgs(params: GenerationParams): Promise<unknown[]> {
     params.audioCoverStrength ?? 1.0,                             // 18: Audio Cover Strength
     0.0,                                                          // 19: Cover Noise Strength (ACE-Step v1.5 new param, default 0.0)
     (params.taskType === 'audio2audio' ? 'cover' : params.taskType) || 'text2music', // 20: Task Type
-    params.useAdg ?? false,                                       // 21: Use ADG
-    params.cfgIntervalStart ?? 0.0,                               // 22: CFG Interval Start
-    params.cfgIntervalEnd ?? 1.0,                                 // 23: CFG Interval End
-    params.shift ?? 0.0,                                          // 24: Shift
-    params.inferMethod || 'ode',                                  // 25: Inference Method
-    params.customTimesteps || '',                                 // 26: Custom Timesteps
-    params.audioFormat || 'mp3',                                  // 27: Audio Format
-    params.lmTemperature ?? 0.85,                                 // 28: LM Temperature
-    isThinking,                                                   // 29: Think
-    params.lmCfgScale ?? 2.0,                                    // 30: LM CFG Scale
-    params.lmTopK ?? 0,                                           // 31: LM Top-K
-    params.lmTopP ?? 0.9,                                         // 32: LM Top-P
-    params.lmNegativePrompt || 'NO USER INPUT',                   // 33: LM Negative Prompt
-    useCot ? (params.useCotMetas ?? true) : false,                // 34: CoT Metas
-    useCot ? (params.useCotCaption ?? true) : false,              // 35: CaptionRewrite
-    useCot ? (params.useCotLanguage ?? true) : false,             // 36: CoT Language
-    params.isFormatCaption ?? false,                              // 37: Is Format Caption State
-    params.constrainedDecodingDebug ?? false,                     // 38: Constrained Decoding Debug
-    params.allowLmBatch ?? true,                                  // 39: ParallelThinking
-    params.getScores ?? false,                                    // 40: Auto Score
-    params.getLrc ?? false,                                       // 41: Auto LRC (timestamped lyrics)
-    params.scoreScale ?? 0.5,                                     // 42: Quality Score Sensitivity (0.01-1.0)
-    params.lmBatchChunkSize ?? 8,                                 // 43: LM Batch Chunk Size
-    params.trackName || null,                                     // 44: Track Name
-    params.completeTrackClasses || [],                            // 45: Track Names
-    true,                                                         // 46: Enable Normalization (ACE-Step v1.5, default true)
-    -1.0,                                                         // 47: Normalization DB (ACE-Step v1.5, default -1.0)
-    0.0,                                                          // 48: Latent Shift (ACE-Step v1.5, default 0.0)
-    1.0,                                                          // 49: Latent Rescale (ACE-Step v1.5, default 1.0)
-    params.autogen ?? false,                                      // 50: AutoGen
+    false,                                                        // 21: No FSQ
+    params.useAdg ?? false,                                       // 22: Use ADG
+    params.cfgIntervalStart ?? 0.0,                               // 23: CFG Interval Start
+    params.cfgIntervalEnd ?? 1.0,                                 // 24: CFG Interval End
+    params.shift ?? 3.0,                                          // 25: Shift (range 1.0-5.0)
+    params.inferMethod || 'ode',                                  // 26: Inference Method
+    'euler',                                                      // 27: Sampler Mode
+    0.0,                                                          // 28: Velocity Norm Threshold
+    0.0,                                                          // 29: Velocity EMA Factor
+    true,                                                         // 30: DCW Enabled
+    'double',                                                     // 31: DCW Mode
+    0.05,                                                         // 32: DCW Scaler
+    0.02,                                                         // 33: DCW High Scaler
+    'haar',                                                       // 34: DCW Wavelet
+    params.customTimesteps || '',                                 // 35: Custom Timesteps
+    params.audioFormat || 'mp3',                                  // 36: Audio Format
+    '128k',                                                       // 37: MP3 Bitrate
+    48000,                                                        // 38: MP3 Sample Rate
+    params.lmTemperature ?? 0.85,                                 // 39: LM Temperature
+    isThinking,                                                   // 40: Think
+    params.lmCfgScale ?? 2.0,                                    // 41: LM CFG Scale
+    params.lmTopK ?? 0,                                           // 42: LM Top-K
+    params.lmTopP ?? 0.9,                                         // 43: LM Top-P
+    params.lmNegativePrompt || 'NO USER INPUT',                   // 44: LM Negative Prompt
+    useCot ? (params.useCotMetas ?? true) : false,                // 45: CoT Metas
+    useCot ? (params.useCotCaption ?? true) : false,              // 46: CaptionRewrite
+    useCot ? (params.useCotLanguage ?? true) : false,             // 47: CoT Language
+    params.isFormatCaption ?? false,                              // 48: Is Format Caption State
+    params.constrainedDecodingDebug ?? false,                     // 49: Constrained Decoding Debug
+    params.allowLmBatch ?? true,                                  // 50: ParallelThinking
+    params.getScores ?? false,                                    // 51: Auto Score
+    params.getLrc ?? false,                                       // 52: Auto LRC
+    params.scoreScale ?? 0.5,                                     // 53: Quality Score Sensitivity (0.01-1.0)
+    params.lmBatchChunkSize ?? 8,                                 // 54: LM Batch Chunk Size
+    params.trackName || null,                                     // 55: Track Name
+    params.completeTrackClasses || [],                            // 56: Track Names
+    true,                                                         // 57: Enable Normalization
+    -1.0,                                                         // 58: Normalization DB
+    0.0,                                                          // 59: Fade In Duration
+    0.0,                                                          // 60: Fade Out Duration
+    0.0,                                                          // 61: Latent Shift
+    1.0,                                                          // 62: Latent Rescale
+    'balanced',                                                   // 63: Repaint Mode
+    0.5,                                                          // 64: Repaint Strength
+    0.0,                                                          // 65: Retake Variance
+    -1,                                                           // 66: Retake Seed
+    false,                                                        // 67: Flow Edit Morph
+    '',                                                           // 68: Flow Edit Source Caption
+    '',                                                           // 69: Flow Edit Source Lyrics
+    0.0,                                                          // 70: Flow Edit N Min
+    1.0,                                                          // 71: Flow Edit N Max
+    1,                                                            // 72: Flow Edit N Avg
+    params.autogen ?? false,                                      // 73: AutoGen
     // Note: current_batch_index, total_batches, batch_queue, generation_params_state
     // are hidden Gradio state variables and must NOT be passed via client.predict()
   ];

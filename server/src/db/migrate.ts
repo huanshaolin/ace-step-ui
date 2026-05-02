@@ -139,6 +139,15 @@ CREATE INDEX IF NOT EXISTS idx_followers_follower ON followers(follower_id);
 CREATE INDEX IF NOT EXISTS idx_followers_following ON followers(following_id);
 CREATE INDEX IF NOT EXISTS idx_reference_tracks_user_id ON reference_tracks(user_id);
 CREATE INDEX IF NOT EXISTS idx_reference_tracks_created_at ON reference_tracks(created_at);
+
+-- OAuth tokens table (single-owner YouTube credentials)
+CREATE TABLE IF NOT EXISTS oauth_tokens (
+  provider TEXT PRIMARY KEY,
+  access_token TEXT,
+  refresh_token TEXT,
+  expiry_date INTEGER,
+  updated_at TEXT DEFAULT (datetime('now'))
+);
 `;
 
 function migrate(): void {

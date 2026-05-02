@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Song } from '../types';
-import { X, Play, Pause, Download, Wand2, Image as ImageIcon, Music, Video, Loader2, Palette, Layers, Zap, Type, Monitor, Aperture, Activity, Circle, Grid, Box, BarChart2, Waves, Disc, Upload, Plus, Trash2, Settings2, MousePointer2, Search, ExternalLink, Sun, Film, Minus } from 'lucide-react';
+import { X, Play, Pause, Download, Wand2, Image as ImageIcon, Music, Video, Loader2, Palette, Layers, Zap, Type, Monitor, Aperture, Activity, Circle, Grid, Box, BarChart2, Waves, Disc, Upload, Plus, Trash2, Settings2, MousePointer2, Search, ExternalLink, Sun, Film, Minus, Youtube } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { useResponsive } from '../context/ResponsiveContext';
+import { checkYouTubeConnected, openYouTubeAuth, uploadToYouTube } from '../services/youtubeUpload';
 
 interface VideoGeneratorModalProps {
   isOpen: boolean;
@@ -147,6 +148,14 @@ export const VideoGeneratorModal: React.FC<VideoGeneratorModalProps> = ({ isOpen
   const [exportProgress, setExportProgress] = useState(0);
   const [exportStage, setExportStage] = useState<'idle' | 'capturing' | 'encoding'>('idle');
   const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
+
+  // YouTube upload state
+  const [lastVideoBlob, setLastVideoBlob] = useState<Blob | null>(null);
+  const [ytConnected, setYtConnected] = useState<boolean | null>(null);
+  const [ytUploading, setYtUploading] = useState(false);
+  const [ytUploadProgress, setYtUploadProgress] = useState(0);
+  const [ytUploadResult, setYtUploadResult] = useState<{ videoId: string; url: string } | null>(null);
+  const [ytError, setYtError] = useState<string | null>(null);
   const [ffmpegLoading, setFfmpegLoading] = useState(false);
 
   // Config State
@@ -213,6 +222,11 @@ export const VideoGeneratorModal: React.FC<VideoGeneratorModalProps> = ({ isOpen
   useEffect(() => { effectsRef.current = effects; }, [effects]);
   useEffect(() => { intensitiesRef.current = intensities; }, [intensities]);
   useEffect(() => { textLayersRef.current = textLayers; }, [textLayers]);
+
+  // Check YouTube connection on open
+  useEffect(() => {
+    checkYouTubeConnected().then(setYtConnected);
+  }, []);
 
   // Load FFmpeg
   const loadFFmpeg = useCallback(async () => {
@@ -884,6 +898,11 @@ export const VideoGeneratorModal: React.FC<VideoGeneratorModalProps> = ({ isOpen
     const url = URL.createObjectURL(blob);
     console.log('[Video] Created blob URL:', url, 'Size:', blob.size);
 
+    // Save blob for YouTube upload
+    setLastVideoBlob(blob);
+    setYtUploadResult(null);
+    setYtError(null);
+
     // More reliable download method
     const a = document.createElement('a');
     a.style.display = 'none';
@@ -892,7 +911,7 @@ export const VideoGeneratorModal: React.FC<VideoGeneratorModalProps> = ({ isOpen
     document.body.appendChild(a);
     a.click();
 
-    // Delay cleanup to ensure download starts
+    // Delay cleanup to ensure download starts (keep blob alive for YouTube upload)
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
@@ -2186,6 +2205,72 @@ export const VideoGeneratorModal: React.FC<VideoGeneratorModalProps> = ({ isOpen
                  <p className="text-[10px] text-zinc-600 text-center">
                    {ffmpegLoaded ? 'Encoder ready • ' : ''}Offline rendering - faster than real-time.
                  </p>
+
+                 {/* YouTube Upload Section */}
+                 {lastVideoBlob && (
+                   <div className="mt-3 border-t border-zinc-800 pt-3 space-y-2">
+                     {ytUploadResult ? (
+                       <a
+                         href={ytUploadResult.url}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         className="w-full h-10 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors text-sm"
+                       >
+                         <Youtube size={16} />
+                         View on YouTube ↗
+                       </a>
+                     ) : ytUploading ? (
+                       <div className="w-full h-10 bg-zinc-800 rounded-xl flex items-center justify-center gap-2 text-sm text-zinc-300">
+                         <Loader2 className="animate-spin" size={14} />
+                         Uploading {ytUploadProgress}%...
+                       </div>
+                     ) : ytConnected ? (
+                       <button
+                         onClick={async () => {
+                           setYtUploading(true);
+                           setYtError(null);
+                           setYtUploadProgress(0);
+                           try {
+                             const result = await uploadToYouTube(lastVideoBlob, {
+                               title: song.title || 'ACE-Step Video',
+                               description: song.style || '',
+                               tags: song.tags || [],
+                               privacyStatus: 'private',
+                               onProgress: setYtUploadProgress,
+                             });
+                             setYtUploadResult(result);
+                           } catch (e: any) {
+                             setYtError(e.message);
+                           } finally {
+                             setYtUploading(false);
+                           }
+                         }}
+                         className="w-full h-10 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors text-sm"
+                       >
+                         <Youtube size={16} />
+                         Upload to YouTube (Private)
+                       </button>
+                     ) : (
+                       <button
+                         onClick={() => {
+                           openYouTubeAuth();
+                           const interval = setInterval(async () => {
+                             const ok = await checkYouTubeConnected();
+                             if (ok) { setYtConnected(true); clearInterval(interval); }
+                           }, 3000);
+                           setTimeout(() => clearInterval(interval), 120000);
+                         }}
+                         className="w-full h-10 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors text-sm"
+                       >
+                         <Youtube size={16} />
+                         Connect YouTube to Upload
+                       </button>
+                     )}
+                     {ytError && (
+                       <p className="text-[10px] text-red-400 text-center">{ytError}</p>
+                     )}
+                   </div>
+                 )}
             </div>
         </div>
 
