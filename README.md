@@ -278,18 +278,25 @@ apt-get update && apt-get install -y ffmpeg
 ldconfig
 ```
 
-#### Ubuntu 22.04 (jammy)
+#### Ubuntu 22.04 (jammy) / 20.04 (focal) — PPA blocked or unavailable
+
+If you're in a restricted environment (Docker container, corporate network) where Launchpad PPAs are blocked, download FFmpeg shared libraries directly from GitHub:
+
 ```bash
-apt-get install -y software-properties-common
-add-apt-repository -y ppa:ubuntuhandbook1/ffmpeg6
-apt-get update && apt-get install -y ffmpeg
+cd /tmp
+wget https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-lgpl-shared.tar.xz
+tar -xf ffmpeg-master-latest-linux64-lgpl-shared.tar.xz
+cp ffmpeg-master-latest-linux64-lgpl-shared/lib/libav*.so* /usr/local/lib/
+cp ffmpeg-master-latest-linux64-lgpl-shared/lib/libsw*.so* /usr/local/lib/
 ldconfig
 ```
 
-#### Ubuntu 20.04 (focal)
+> **Note:** You may see warnings like `libavutil.so.60 is not a symbolic link` — these are harmless and can be ignored.
+
+If PPAs are accessible:
 ```bash
 apt-get install -y software-properties-common
-add-apt-repository -y ppa:savoury1/ffmpeg5
+add-apt-repository -y ppa:ubuntuhandbook1/ffmpeg6
 apt-get update && apt-get install -y ffmpeg
 ldconfig
 ```
