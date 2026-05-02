@@ -204,7 +204,7 @@ async function buildGradioArgs(params: GenerationParams): Promise<unknown[]> {
     params.allowLmBatch ?? true,                                  // 50: ParallelThinking
     params.getScores ?? false,                                    // 51: Auto Score
     params.getLrc ?? false,                                       // 52: Auto LRC
-    params.scoreScale ?? 0.5,                                     // 53: Quality Score Sensitivity (0.01-1.0)
+    (typeof params.scoreScale === 'number' ? params.scoreScale : 0.5), // 53: Quality Score Sensitivity (0.01-1.0)
     params.lmBatchChunkSize ?? 8,                                 // 54: LM Batch Chunk Size
     params.trackName || null,                                     // 55: Track Name
     params.completeTrackClasses || [],                            // 56: Track Names
